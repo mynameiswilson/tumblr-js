@@ -14,6 +14,7 @@
             img.ben { display: inline-block } 
             #brief p { font-size: 1.25em }
             section { margin-bottom: 1em } 
+            .progress { height: 5px } 
             .posts h2 {
                 max-height: 3.25em;
                 overflow: hidden;
@@ -45,6 +46,8 @@
                         <h1>Ben Wilson</h1>
                         <h3>designer and developer of interactive things</h3>
                         <h2 class="text-center">Tumblr Code Test</h2>
+                        <p>My Javascript solution (<a href="https://github.com/mynameiswilson/tumblr-js">github</a>)</p>
+                        <p><a href="/codetest/">&laquo; back</a></p>
                     </div>
                 </div>
             </div>
@@ -58,7 +61,7 @@
                             <div class="form-group" id="tumblr_name_group">
                                 <label class="sr-only" for="tumblr_name">Tumblr blog</label>
                                 <input type="text" class="form-control input-lg text-center" id="tumblr_name" placeholder="Enter the name of a tumblr blog" />
-                                <span class="help-block text-center"></span>
+                                <span class="help-block text-center">e.g. oldloves, oldloves.tumblr.com, www.worstroom.com</span>
                             </div>
                         </form>
                     </div>
@@ -71,7 +74,13 @@
 
                             <div class="posts_container">
                                 <ul class="pagination"></ul>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width:10%"></div>
+                                </div>
                                 <div class="posts row"></div>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width:10%"></div>
+                                </div>
                                 <ul class="pagination"></ul>
                             </div> 
                         </div>
@@ -171,6 +180,8 @@
 
                 $pager.append( strings.pagination_tick.f("ffwd "+((cur_page==total_pages)?"disabled":""),"&raquo;&raquo;") )
                       .append( strings.pagination_tick.f("next "+((cur_page==total_pages)?"disabled":""),"&raquo;") );
+console.log(total_pages);
+                $('.posts_container .progress .progress-bar').width( ( cur_page / total_pages ) * 100 + "%");
 
             }
 
@@ -214,7 +225,8 @@
                         if (data.hasOwnProperty("response")) {
                             tumblr_data = data.response;
                             total_pages = 1 + Math.floor(tumblr_data.total_posts/per_page);
-                            
+
+
                             //save some meta data for latah
                             var last_updated = new Date(tumblr_data.blog.updated * 1000);
                             
