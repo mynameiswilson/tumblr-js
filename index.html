@@ -186,12 +186,14 @@
                 }
 
                 $(document).ready(function() {
-                        console.log('ready');
+                    console.log('ready');
                     var keyup_timeout;
                     $(window).on("hashchange", _hash_change);
                     $('#tumblr_form').on("submit",function() { return false; });
                     $('#tumblr_name').on("keyup",function(){ clearTimeout(keyup_timeout); keyup_timeout = setTimeout(_tumblr_name_change,1000); })
                     .on("change",_tumblr_name_change);
+
+                    _hash_change();
                 });
              
                 /* TumblrSearch */
@@ -262,6 +264,7 @@
                 };
 
                 TumblrSearch.prototype._handle_tumblr_req = function(data,status) {
+                    var me = this;
 
                     if (data.hasOwnProperty("meta") && data.meta.hasOwnProperty("status") && data.meta.status == 404) {
                         //alert user to failboat
@@ -289,7 +292,7 @@
                                         container: ".posts_container",
                                         posts_container: ".posts_container .posts",
                                         pagination_container: ".posts_container .pagination",
-                                        current_page: search.current_page
+                                        current_page: me.current_page
                                         });
 //                                this.settings.on_search_success(data.response);
                             } else {
@@ -304,10 +307,17 @@
                 function TumblrDisplay(search,opts) {
                     var me = this;
                     this.search = search;
+                    this.current_page = search.current_page;
                     this.settings = {
                         container: "#tumblr_content",
                         pagination_container: ".pagination",
                         posts_container: ".posts",
+                        sel_title: '#tumblr_content .tumblr_title',
+                        sel_description: "#tumblr_content .tumblr_description",
+                        sel_last_updated: "#tumblr_content .last-updated",
+                        sel_num_posts: "#tumblr_content .num-posts",
+                        sel_per_page: "#tumblr_content .per-page",
+                        sel_total_pages: "#tumblr_content .total-pages",
                         pagination_tick: '<li class="{0}"><a data-page={1} href="#">{1}</a></li>',
                         post_template: '<div class="col-md-{3}"><h2><a href="{0}">{1}</a></h2><p class="date">{2}</p></div>',
                         posts_per_page: 10,
@@ -317,21 +327,37 @@
 
                     this.total_pages = Math.ceil(this.search.data.blog.posts/this.settings.posts_per_page);
 
-                    this.pagination = new Pagination(this, { pagination_container: ".pagination", 
-                        page_changed: function() {
+                    this.pagination = new Pagination(this, { 
+                        pagination_container: ".pagination", 
+                        page_changed: function(page) {
+                            me.search.current_page = page;
                             window.location.hash = "#" + getDomainFromURI(me.search.data.blog.url)  + "|" + me.search.current_page;
                         }
                     });
+
+                    
 
                     //The locs property is required
                     if(this.search.data.hasOwnProperty("posts")) {
                         $('#tumblr_content').show();
                         this.data = this.search.data;
+                        this.displayMeta();
                         this.displayPosts();
                     } else {
                         throw 'No Tumblr data provided.';
                     }
                 };
+
+                TumblrDisplay.prototype.displayMeta = function() {
+                    $(this.settings.sel_title).html(this.data.blog.title);
+                    $(this.settings.sel_description).html(this.data.blog.description);
+                    $(this.settings.sel_num_posts).html(this.data.blog.posts); 
+                    var last_updated = new Date(this.data.blog.updated * 1000);
+                    $(this.settings.sel_last_updated).html(last_updated); 
+                    $(this.settings.sel_per_page).html(this.settings.posts_per_page);
+                    $(this.settings.sel_total_pages).html(this.total_pages);
+
+                }
 
                 TumblrDisplay.prototype.displayPosts = function() {
                     $posts = $(this.settings.posts_container).html("");
@@ -354,6 +380,7 @@
                             pages_to_show_in_nav: 11,
                             pagination_container: ".pagination",
                             pagination_tick: '<li class="{0}"><a data-page={1} href="#">{1}</a></li>',
+                            page_changed: function(page) {}
                         };
                         $.extend(this.settings,opts);
 
@@ -362,11 +389,11 @@
                         }
 
                         $(this.settings.pagination_container).on("click","a",function() { 
-                                event.preventDefault(); 
-                                if ( $(this).parent().hasClass("prev") ) to_page = this.current_page - 1;
-                                if ( $(this).parent().hasClass("rwd") )  to_page = this.current_page - 10;
-                                if ( $(this).parent().hasClass("ffwd") ) to_page = this.current_page + 10;
-                                if ( $(this).parent().hasClass("next") ) to_page = this.current_page + 1;
+                                event.preventDefault();
+                                if ( $(this).parent().hasClass("prev") ) to_page = me.current_page - 1;
+                                if ( $(this).parent().hasClass("rwd") )  to_page = me.current_page - 10;
+                                if ( $(this).parent().hasClass("ffwd") ) to_page = me.current_page + 10;
+                                if ( $(this).parent().hasClass("next") ) to_page = me.current_page + 1;
                                 if ( $(this).parent().hasClass("page") ) to_page = $(this).data("page");
                                 me.goPage(to_page) 
                         });
@@ -401,13 +428,12 @@
 
                 };
                 Pagination.prototype.goPage = function(page) {
-                    
+                   console.log('going to page ' + page); 
                     if (page <= 0) page = 1;
                     if (page > this.total_pages) page = this.total_pages;
 
                     if ( page > 0 && page <= this.total_pages  ) {
                         this.current_page = page;
-
                         //callback
                         this.settings.page_changed(this.current_page);
                     }
