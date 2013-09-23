@@ -59,8 +59,8 @@
                         <h1>Ben Wilson</h1>
                         <h3>designer and developer of interactive things</h3>
                         <h2 class="text-center">Tumblr Code Test</h2>
-                        <p>My Javascript solution (<a href="https://github.com/mynameiswilson/tumblr-js">github</a>)</p>
-                        <p><a href="/codetest/">&laquo; back</a></p>
+                        <p>My "better" Javascript solution (<a href="https://github.com/mynameiswilson/tumblr-js">github</a>)</p>
+                        <p><a href="../js">view the "not-so-good" solution</a> or <a href="/codetest/">&laquo; back</a></p>
                     </div>
                 </div>
             </div>
@@ -336,9 +336,9 @@
                         if(this.search.hasOwnProperty("data") && this.search.data.hasOwnProperty("posts")) {
                             $('#tumblr_content').show();
                             this.data = this.search.data;
+                            this.total_pages = Math.ceil(this.search.data.blog.posts/this.settings.posts_per_page);
                             this.displayMeta();
                             this.displayPosts();
-                            this.total_pages = Math.ceil(this.search.data.blog.posts/this.settings.posts_per_page);
 
                             $('#tumblr_content .position').css("left",(this.current_page/this.total_pages*100)+"%");
 
@@ -363,7 +363,6 @@
                     $(this.settings.sel_last_updated).html(last_updated); 
                     $(this.settings.sel_per_page).html(this.settings.posts_per_page);
                     $(this.settings.sel_total_pages).html(this.total_pages);
-
                 }
 
                 TumblrDisplay.prototype.displayPosts = function() {
