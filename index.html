@@ -10,7 +10,7 @@
         <style type="text/css">
             body>header { margin: 1em 0 } 
             body>header h1 { font-family: "Bangers"; font-size: 6em }
-            body>header h3 { margin-top: -.75em }
+            body>header h1+h3 { margin-top: -.75em }
             img.ben { display: inline-block } 
             #brief p { font-size: 1.25em }
             section { margin-bottom: 1em } 
@@ -59,7 +59,7 @@
                         <h1>Ben Wilson</h1>
                         <h3>designer and developer of interactive things</h3>
                         <h2 class="text-center">Tumblr Code Test</h2>
-                        <p>My "better" Javascript solution (<a href="https://github.com/mynameiswilson/tumblr-js">github</a>)</p>
+                        <h3>My "better" Javascript solution (<a href="https://github.com/mynameiswilson/tumblr-js">github</a>)</h3>
                         <p><a href="../js">view the "not-so-good" solution</a> or <a href="/codetest/">&laquo; back</a></p>
                     </div>
                 </div>
@@ -290,7 +290,6 @@
 
                         if (data.hasOwnProperty("meta") && data.meta.hasOwnProperty("status") && data.meta.status == 200 ) {
                             if (data.hasOwnProperty("response")) {
-
                                 this.data = data.response;
                                 var display = new TumblrDisplay(this, {
                                         container: ".posts_container",
@@ -340,6 +339,8 @@
                             this.displayMeta();
                             this.displayPosts();
 
+                            window.location.hash = "#" + this.search.name + "|" + this.current_page;
+
                             $('#tumblr_content .position').css("left",(this.current_page/this.total_pages*100)+"%");
 
                             this.pagination = new Pagination(this, { 
@@ -369,7 +370,7 @@
                     $posts = $(this.settings.posts_container).html("");
                     for (var i=0;i<this.data.posts.length;i++) {
                         post = this.data.posts[i];
-                        $posts.append( this.settings.post_template.f( post.post_url,(typeof post.caption == "undefined")?"<em>untitled</em>":post.caption,post.date, (i==0)?"12":"4" ) );
+                        $posts.append( this.settings.post_template.f( post.post_url,(typeof post.caption == "undefined" || post.caption == "" )?"<em>untitled</em>":post.caption,post.date, (i==0)?"12":"4" ) );
                         if ( i==0 || i%3==0 ) {
                             $posts.append('</div><!--/end row-->\n<div class="row">');
                         }
@@ -392,7 +393,7 @@
                             this.current_page = display.current_page;
                         }
 
-                        $(this.settings.pagination_container).on("click","a",function() { 
+                        $(this.settings.pagination_container).one("click","a",function() { 
                                 event.preventDefault();
                                 if ( $(this).parent().hasClass("prev") ) to_page = me.current_page - 1;
                                 if ( $(this).parent().hasClass("rwd") )  to_page = me.current_page - 10;
